@@ -66,15 +66,15 @@ public class MainActivity extends Activity {
             if (!isMeasurementRunning.get())
                 return;
             Log.i(APP_TAG, "Failed measurement");
-            spO2Listener.stopTracker();
-            isMeasurementRunning.set(false);
-            runOnUiThread(() ->
-            {
-                txtStatus.setText(R.string.MeasurementFailed);
-                txtStatus.invalidate();
-                txtSpo2.setText(R.string.SpO2DefaultValue);
-                txtSpo2.invalidate();
-                butStart.setText(R.string.StartLabel);
+                        spO2Listener.stopTracker();
+                isMeasurementRunning.set(false);
+                runOnUiThread(() ->
+                {
+                    txtStatus.setText(R.string.MeasurementFailed);
+                    txtStatus.invalidate();
+                    txtSpo2.setText(R.string.SpO2DefaultValue);
+                    txtSpo2.invalidate();
+                    butStart.setText(R.string.StartLabel);
                 measurementProgress.setProgress(measurementProgress.getMax(), true);
                 measurementProgress.invalidate();
             });
@@ -266,27 +266,35 @@ public class MainActivity extends Activity {
         }
 
         if (!isMeasurementRunning.get()) {
+            // Start new measurement
             previousStatus = SpO2Status.INITIAL_STATUS;
             butStart.setText(R.string.StopLabel);
             txtSpo2.setText(R.string.SpO2DefaultValue);
             measurementProgress.setProgress(0);
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+            // Start the tracker
             spO2Listener.startTracker();
             isMeasurementRunning.set(true);
+
+            // Start countdown timer for measurement duration
             uiUpdateThread = new Thread(countDownTimer::start);
             uiUpdateThread.start();
         } else {
-            butStart.setEnabled(false);
+            // Stop ongoing measurement
             isMeasurementRunning.set(false);
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             spO2Listener.stopTracker();
+
+            // Reset the UI
             final Handler progressHandler = new Handler(Looper.getMainLooper());
             progressHandler.postDelayed(() -> {
                 butStart.setText(R.string.StartLabel);
                 txtStatus.setText(R.string.StatusDefaultValue);
                 measurementProgress.setProgress(0);
-                butStart.setEnabled(true);
+                butStart.setEnabled(true);  // Re-enable the button
             }, MEASUREMENT_TICK * 2);
+
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
     }
 

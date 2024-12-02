@@ -18,9 +18,11 @@ public class HeartRateListener extends BaseListener {
     // Firebase Database reference
     private final DatabaseReference heartRateRef;
 
-    // Modify constructor to accept FirebaseAnalytics
+    // Last push timestamp
+    private long lastPushTime = 0;
+
     public HeartRateListener(FirebaseAnalytics firebaseAnalytics) {
-        super(firebaseAnalytics);  // Pass FirebaseAnalytics to the BaseListener constructor
+        super(firebaseAnalytics);
 
         // Initialize Firebase reference
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -71,27 +73,28 @@ public class HeartRateListener extends BaseListener {
                 hrData.qIbi = hrIbiStatus.get(hrIbiStatus.size() - 1);
             }
 
-            // Log the data
-            Log.d(APP_TAG, "Heart Rate: " + hrData.hr + " BPM");
-            Log.d(APP_TAG, "IBI: " + hrData.ibi + " ms");
-            Log.d(APP_TAG, "Quality IBI: " + hrData.qIbi);
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastPushTime >= 5000) { // Check if 5 seconds have passed
+                lastPushTime = currentTime;
 
-            // Prepare data for Firebase
-            Map<String, Object> heartRateData = new HashMap<>();
-            heartRateData.put("bpm", hrData.hr);
-            heartRateData.put("status", hrData.status);
-            heartRateData.put("ibi", hrData.ibi);
-            heartRateData.put("qualityIbi", hrData.qIbi);
-            heartRateData.put("timestamp", System.currentTimeMillis());
+                // Prepare data for Firebase
+                Map<String, Object> heartRateData = new HashMap<>();
+                heartRateData.put("bpm", hrData.hr);
+                heartRateData.put("status", hrData.status);
+                heartRateData.put("ibi", hrData.ibi);
+                heartRateData.put("qualityIbi", hrData.qIbi);
+                heartRateData.put("timestamp", currentTime);
 
-            // Push data to Firebase
-            heartRateRef.push().setValue(heartRateData)
-                    .addOnSuccessListener(aVoid -> Log.d(APP_TAG, "Data successfully pushed to Firebase"))
-                    .addOnFailureListener(e -> Log.e(APP_TAG, "Failed to push data to Firebase", e));
+                // Push data to Firebase
+                heartRateRef.push().setValue(heartRateData)
+                        .addOnSuccessListener(aVoid -> Log.d(APP_TAG, "Data successfully pushed to Firebase"))
+                        .addOnFailureListener(e -> Log.e(APP_TAG, "Failed to push data to Firebase", e));
 
-            TrackerDataNotifier.getInstance().notifyHeartRateTrackerObservers(hrData);
+                TrackerDataNotifier.getInstance().notifyHeartRateTrackerObservers(hrData);
+            }
         } catch (Exception e) {
             Log.e(APP_TAG, "Error reading values from DataPoint", e);
         }
     }
 }
+

@@ -38,78 +38,78 @@ public class BaseListener {
     }
 
     public void startTracker() {
-        Log.i(APP_TAG, "startTracker called ");
+        Log.i(APP_TAG, "startTracker called");
 
         // Null checks before calling toString
-        if (healthTracker != null) {
-            Log.d(APP_TAG, "healthTracker: " + healthTracker);
-        } else {
+        if (healthTracker == null) {
             Log.e(APP_TAG, "healthTracker is null");
+            return;
         }
 
-        if (trackerEventListener != null) {
-            Log.d(APP_TAG, "trackerEventListener: " + trackerEventListener);
-        } else {
+        if (trackerEventListener == null) {
             Log.e(APP_TAG, "trackerEventListener is null");
+            return;
         }
 
+        // Ensure the handler is not already running to avoid multiple start requests
         if (!isHandlerRunning) {
             handler.post(() -> {
-                // Practice 3: Set the event listener on the HealthTracker object
-                if (healthTracker != null && trackerEventListener != null) {
-                    healthTracker.setEventListener(trackerEventListener);
+                // Set the event listener on the HealthTracker object
+                healthTracker.setEventListener(trackerEventListener);
 
-                    // Log event to Firebase for start of tracker
-                    if (firebaseAnalytics != null) {
-                        Log.d(APP_TAG, "Logging Firebase event: Tracker Started");
-                        Bundle bundle = new Bundle();
-                        bundle.putString("tracker_status", "started");
-                        firebaseAnalytics.logEvent("tracker_event", bundle);
-                    }
+                // Log event to Firebase for start of tracker
+                logTrackerEvent("started");
 
-                    // Mark handler as running
-                    setHandlerRunning(true);
-                }
+                // Mark handler as running
+                setHandlerRunning(true);
             });
+        } else {
+            Log.w(APP_TAG, "Tracker is already running. Ignoring start request.");
         }
     }
 
     public void stopTracker() {
-        Log.i(APP_TAG, "stopTracker called ");
+        Log.i(APP_TAG, "stopTracker called");
 
         // Null checks before calling toString
-        if (healthTracker != null) {
-            Log.d(APP_TAG, "healthTracker: " + healthTracker);
-        } else {
+        if (healthTracker == null) {
             Log.e(APP_TAG, "healthTracker is null");
+            return;
         }
 
-        if (trackerEventListener != null) {
-            Log.d(APP_TAG, "trackerEventListener: " + trackerEventListener);
-        } else {
+        if (trackerEventListener == null) {
             Log.e(APP_TAG, "trackerEventListener is null");
+            return;
         }
 
+        // Only stop tracker if it is running
         if (isHandlerRunning) {
             handler.post(() -> {
-                // Practice 4: Try to remove the event listener by setting it to null
-                if (healthTracker != null) {
-                    healthTracker.setEventListener(null);
-                }
+                // Use unsetEventListener instead of setEventListener(null)
+                healthTracker.unsetEventListener();
 
                 // Log event to Firebase for stop of tracker
-                if (firebaseAnalytics != null) {
-                    Log.d(APP_TAG, "Logging Firebase event: Tracker Stopped");
-                    Bundle bundle = new Bundle();
-                    bundle.putString("tracker_status", "stopped");
-                    firebaseAnalytics.logEvent("tracker_event", bundle);
-                }
+                logTrackerEvent("stopped");
 
                 // Mark handler as not running
                 setHandlerRunning(false);
+
+                // Optionally, clear any scheduled tasks or messages for the handler
                 handler.removeCallbacksAndMessages(null);
             });
+        } else {
+            Log.w(APP_TAG, "Tracker is not running. Ignoring stop request.");
+        }
+    }
+
+    private void logTrackerEvent(String status) {
+        if (firebaseAnalytics != null) {
+            Log.d(APP_TAG, "Logging Firebase event: Tracker " + status);
+            Bundle bundle = new Bundle();
+            bundle.putString("tracker_status", status);
+            firebaseAnalytics.logEvent("tracker_event", bundle);
+        } else {
+            Log.e(APP_TAG, "FirebaseAnalytics is null. Unable to log event.");
         }
     }
 }
-
