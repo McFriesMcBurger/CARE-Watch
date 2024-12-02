@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="confirmation_overlay_text_inset_margin" type="fraction">7.28%</item>
+    <style name="Theme.MainTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:windowDisablePreview">true</item>
+    </style>
+</resources>

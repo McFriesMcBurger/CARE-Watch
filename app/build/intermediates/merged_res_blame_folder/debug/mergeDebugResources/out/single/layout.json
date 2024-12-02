@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.samsung.health.multisensortracking.app-mergeDebugResources-41:/layout/activity_details.xml",
+        "source": "com.samsung.health.multisensortracking.app-main-44:/layout/activity_details.xml"
+    },
+    {
+        "merged": "com.samsung.health.multisensortracking.app-mergeDebugResources-41:/layout/activity_main.xml",
+        "source": "com.samsung.health.multisensortracking.app-main-44:/layout/activity_main.xml"
+    }
+]

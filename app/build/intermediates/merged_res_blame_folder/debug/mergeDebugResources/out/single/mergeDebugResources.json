@@ -1,0 +1,34 @@
+[
+    {
+        "merged": "com.samsung.health.multisensortracking.app-debug-42:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "com.samsung.health.multisensortracking.app-main-44:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.samsung.health.multisensortracking.app-debug-42:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "com.samsung.health.multisensortracking.app-main-44:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.samsung.health.multisensortracking.app-debug-42:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "com.samsung.health.multisensortracking.app-main-44:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.samsung.health.multisensortracking.app-debug-42:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "com.samsung.health.multisensortracking.app-main-44:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.samsung.health.multisensortracking.app-debug-42:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "com.samsung.health.multisensortracking.app-main-44:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "com.samsung.health.multisensortracking.app-debug-42:/layout_activity_details.xml.flat",
+        "source": "com.samsung.health.multisensortracking.app-main-44:/layout/activity_details.xml"
+    },
+    {
+        "merged": "com.samsung.health.multisensortracking.app-debug-42:/layout_activity_main.xml.flat",
+        "source": "com.samsung.health.multisensortracking.app-main-44:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.samsung.health.multisensortracking.app-debug-42:/drawable_button_background.xml.flat",
+        "source": "com.samsung.health.multisensortracking.app-main-44:/drawable/button_background.xml"
+    }
+]
