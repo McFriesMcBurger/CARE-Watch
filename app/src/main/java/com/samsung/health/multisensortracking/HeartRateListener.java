@@ -1,4 +1,5 @@
 package com.samsung.health.multisensortracking;
+
 import android.util.Log;
 import androidx.annotation.NonNull;
 import com.google.firebase.database.DatabaseReference;
@@ -15,16 +16,15 @@ import java.util.Map;
 public class HeartRateListener extends BaseListener {
     private final static String APP_TAG = "HeartRateListener";
 
-    // Firebase Database reference
     private final DatabaseReference heartRateRef;
-
-    // Last push timestamp
     private long lastPushTime = 0;
+
+    // Counter to track the number of data blocks
+    private int dataBlockCounter = 0;
 
     public HeartRateListener(FirebaseAnalytics firebaseAnalytics) {
         super(firebaseAnalytics);
 
-        // Initialize Firebase reference
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         heartRateRef = database.getReference("sensors/heartRate");
 
@@ -60,7 +60,6 @@ public class HeartRateListener extends BaseListener {
         try {
             final HeartRateData hrData = new HeartRateData();
 
-            // Populate heart rate data
             hrData.status = dataPoint.getValue(ValueKey.HeartRateSet.HEART_RATE_STATUS);
             hrData.hr = dataPoint.getValue(ValueKey.HeartRateSet.HEART_RATE);
             List<Integer> hrIbiList = dataPoint.getValue(ValueKey.HeartRateSet.IBI_LIST);
@@ -73,21 +72,35 @@ public class HeartRateListener extends BaseListener {
                 hrData.qIbi = hrIbiStatus.get(hrIbiStatus.size() - 1);
             }
 
+            if (hrData.hr == 0) {
+                Log.d(APP_TAG, "Skipping Firebase push for bpm value of 0");
+                return;
+            }
+
             long currentTime = System.currentTimeMillis();
-            if (currentTime - lastPushTime >= 5000) { // Check if 5 seconds have passed
+            if (currentTime - lastPushTime >= 2000) {
                 lastPushTime = currentTime;
 
-                // Prepare data for Firebase
+                // Generate a new unique key for this data block
+                DatabaseReference newHeartRateRef = heartRateRef.push();
+                String dataId = newHeartRateRef.getKey(); // Get the generated ID
+
+                // Increment the counter
+                dataBlockCounter++;
+
+                // Include the ID and counter in the data
                 Map<String, Object> heartRateData = new HashMap<>();
+                heartRateData.put("id", dataId); // Add the unique ID
+                heartRateData.put("counter", dataBlockCounter); // Add the counter
                 heartRateData.put("bpm", hrData.hr);
                 heartRateData.put("status", hrData.status);
                 heartRateData.put("ibi", hrData.ibi);
                 heartRateData.put("qualityIbi", hrData.qIbi);
                 heartRateData.put("timestamp", currentTime);
 
-                // Push data to Firebase
-                heartRateRef.push().setValue(heartRateData)
-                        .addOnSuccessListener(aVoid -> Log.d(APP_TAG, "Data successfully pushed to Firebase"))
+                // Push the data to Firebase
+                newHeartRateRef.setValue(heartRateData)
+                        .addOnSuccessListener(aVoid -> Log.d(APP_TAG, "Data successfully pushed to Firebase with ID: " + dataId + " and Counter: " + dataBlockCounter))
                         .addOnFailureListener(e -> Log.e(APP_TAG, "Failed to push data to Firebase", e));
 
                 TrackerDataNotifier.getInstance().notifyHeartRateTrackerObservers(hrData);
@@ -97,4 +110,3 @@ public class HeartRateListener extends BaseListener {
         }
     }
 }
-

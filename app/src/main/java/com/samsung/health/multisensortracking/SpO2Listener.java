@@ -57,13 +57,6 @@ public class SpO2Listener extends BaseListener {
         };
         setTrackerEventListener(trackerEventListener);
     }
-
-    public void restartTracker() {
-        Log.i(APP_TAG, "Restarting SpO2 tracker...");
-        stopTracker();
-        startTracker(); // Restart the tracker
-    }
-
     public void updateSpo2(DataPoint dataPoint) {
         try {
             // Extract status and SpO2 value
@@ -86,15 +79,20 @@ public class SpO2Listener extends BaseListener {
             if (currentTime - lastPushTime >= 5000) { // Check if 5 seconds have passed
                 lastPushTime = currentTime;
 
+                // Generate a new unique key for this data block
+                DatabaseReference newSpO2Ref = spO2Ref.push();
+                String dataId = newSpO2Ref.getKey(); // Get the generated ID
+
                 // Prepare data for Firebase
                 Map<String, Object> spO2Map = new HashMap<>();
+                spO2Map.put("id", dataId); // Include the ID in the data block
                 spO2Map.put("status", spO2Data.getStatus());
                 spO2Map.put("spo2_value", spO2Data.getSpo2Value());
                 spO2Map.put("timestamp", currentTime);
 
                 // Push data to Firebase
-                spO2Ref.push().setValue(spO2Map)
-                        .addOnSuccessListener(aVoid -> Log.d(APP_TAG, "SpO2 data successfully pushed to Firebase"))
+                newSpO2Ref.setValue(spO2Map)
+                        .addOnSuccessListener(aVoid -> Log.d(APP_TAG, "SpO2 data successfully pushed to Firebase with ID: " + dataId))
                         .addOnFailureListener(e -> Log.e(APP_TAG, "Failed to push SpO2 data to Firebase", e));
 
                 TrackerDataNotifier.getInstance().notifySpO2TrackerObservers(status, spo2Value);
